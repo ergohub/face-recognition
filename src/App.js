@@ -64,14 +64,14 @@ class App extends React.Component {
     this.state = {
       input: '',
       imageUrl : '',
-      box: []
+      boxes: []
     }
   };
 
 
-  displayFaceBox = (box) => {
-    console.log(box);
-    this.setState({box:box})
+  setFaceBoxes = (boxes) => {
+    this.setState({boxes:boxes})
+    // console.log(box)
   }
 
   onInputChange =(event) => {
@@ -89,24 +89,39 @@ class App extends React.Component {
       .then(result => {
 
           const regions = result.outputs[0].data.regions;
+          const image = document.getElementById('inputImage');
+          const width = Number(image.width);
+          const height = Number(image.height);
+          
+          // const boxes = regions.map((region) => {
+          //   const boundingBox = region.region_info.bounding_box;
 
-          regions.forEach(region => {
-              const image = document.getElementById('inputImage');
-              const width = Number(image.width);
-              const height = Number(image.height);
-              // Accessing and rounding the bounding box values
+          //   const boundaries = {
+          //     topRow: boundingBox.top_row * height,
+          //     leftCol: boundingBox.left_col * width,
+          //     bottomRow: height - (boundingBox.bottom_row * height),
+          //     rightCol: width - (boundingBox.right_col * width)
+          //   }
+
+          //   return boundaries;
+          // })
+
+          const boxes = [];
+
+          regions.forEach((region) => {
               const boundingBox = region.region_info.bounding_box;
-              
+
               const boundaries = {
                 topRow: boundingBox.top_row * height,
                 leftCol: boundingBox.left_col * width,
                 bottomRow: height - (boundingBox.bottom_row * height),
                 rightCol: width - (boundingBox.right_col * width)
               }
-                this.displayFaceBox(boundaries);
-              
+
+              boxes.push(boundaries);
           });
 
+          this.setFaceBoxes(boxes);
       })
       .catch(error => console.log('error', error));
 
@@ -116,22 +131,26 @@ class App extends React.Component {
   }
 
   render() {
-  return (
-    <div className="App">
-      <Navigation />
-        <Logo />
-        <Rank />
-      <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
-      <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl}/>
-      <ParticlesBg 
-        type="cobweb" 
-        bg={true}
-        color='#FFFFFF'
-      />
-    </div>
-    
-  );
-}
+    // const boxes = this.state.box;
+    // console.log(this.state.box);
+    return (
+      <div className="App">
+        <Navigation />
+          <Logo />
+          <Rank />
+        <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
+
+        <FaceRecognition boxes={this.state.boxes} imageUrl={this.state.imageUrl}/>
+
+        <ParticlesBg 
+          type="cobweb" 
+          bg={true}
+          color='#FFFFFF'
+        />
+      </div>
+      
+    );
+  }
 }
 
 export default App;
